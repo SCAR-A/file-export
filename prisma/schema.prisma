@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  username       String    @unique(map: "uk_username") @db.VarChar(50)
+  password       String?   @db.VarChar(255)
+  salt           String?   @db.VarChar(32)
+  nickname       String?   @db.VarChar(50)
+  avatarUrl      String?   @map("avatar_url") @db.VarChar(255)
+  bio            String?   @db.Text
+  status         Int?      @default(1) @db.TinyInt
+  registerSource Int?      @map("register_source") @db.TinyInt
+  registerIp     String?   @map("register_ip") @db.VarChar(50)
+  registerDevice String?   @map("register_device") @db.VarChar(255)
+  lastLoginAt    DateTime? @map("last_login_at") @db.Timestamp(0)
+  lastLoginIp    String?   @map("last_login_ip") @db.VarChar(50)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  @@map("t_user")
+  @@index([status], map: "idx_status")
+  @@index([createdAt], map: "idx_created_at")
+}
+
+// 用户状态枚举
+enum UserStatus {
+  NORMAL   @map("1")
+  DISABLED @map("2")
+}
+
+// 注册来源枚举
+enum RegisterSource {
+  PHONE   @map("1")
+  WECHAT  @map("2")
+  EMAIL   @map("3")
+  GOOGLE  @map("4")
+}
